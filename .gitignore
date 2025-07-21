@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# dotenv environment variables
+.env
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Optional cache and build files
+dist/
+build/
+.cache/
+
+# vscode settings (optional)
+.vscode/

@@ -1,14 +1,23 @@
-import express from 'express'
-import cors from 'cors'
+import dotenv from 'dotenv';
+dotenv.config();
 
-import downloadRoutes from './routes/downloadRoutes.js'
-import healthRouter from './routes/healthRoutes.js'
-import infoRoutes from './routes/infoRoutes.js'
+import express from 'express';
+import cors from 'cors';
+
+import downloadRoutes from './routes/downloadRoutes.js';
+import healthRouter from './routes/healthRoutes.js';
+import infoRoutes from './routes/infoRoutes.js';
+
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+// Test route
+app.get("/", (req, res) => {
+  res.send("🚀 Backend is live!");
+});
 
 app.use('/', infoRoutes);
 app.use('/', downloadRoutes);
