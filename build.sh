@@ -9,21 +9,13 @@ pip3 install --upgrade pip
 
 # Install yt-dlp
 echo "📦 Installing yt-dlp..."
-pip3 install --user yt-dlp
-
-# Add user bin to PATH for the current session (Render's build environment)
-export PATH="$HOME/.local/bin:$PATH"
+pip3 install yt-dlp
 
 # Confirm yt-dlp installation
 if ! command -v yt-dlp &> /dev/null; then
-    echo "❌ yt-dlp not found in PATH after installation. Checking user local bin..."
-    if [ -f "$HOME/.local/bin/yt-dlp" ]; then
-        echo "✅ Found yt-dlp in ~/.local/bin/"
-        $HOME/.local/bin/yt-dlp --version
-    else
-        echo "❌ yt-dlp installation failed or not found!"
-        exit 1
-    fi
+    echo "❌ yt-dlp was not found in the environment's PATH after installation!"
+    echo "Please ensure yt-dlp is correctly installed and accessible."
+    exit 1
 else
     echo "✅ yt-dlp installed successfully!"
     yt-dlp --version
