@@ -1,5 +1,5 @@
 import isValidUrl from "../utils/validateUrl.js";
-import { execAsync } from "../utils/ytDlpUtils.js";
+import { execAsync, checkYtDlp } from "../utils/ytDlpUtils.js";
 
 export async function getVideoInfo(req, res) {
   const { url } = req.body;
@@ -13,10 +13,24 @@ export async function getVideoInfo(req, res) {
   }
 
   try {
-    // Log command execution
-    console.log(`🛠️ [getVideoInfo] Running command: yt-dlp --dump-json "${url}"`);
+    // First check if yt-dlp is available and get the correct command path
+    console.log("🔍 [getVideoInfo] Checking yt-dlp availability...");
+    let ytDlpCommand;
+    try {
+      ytDlpCommand = await checkYtDlp();
+      console.log("✅ [getVideoInfo] yt-dlp is available");
+    } catch (versionError) {
+      console.error("❌ [getVideoInfo] yt-dlp not found:", versionError.message);
+      return res.status(500).json({ 
+        error: 'yt-dlp not available on server', 
+        details: 'Video processing tool is not installed on the deployment environment' 
+      });
+    }
 
-    const { stdout } = await execAsync(`yt-dlp --dump-json "${url}"`);
+    // Log command execution
+    console.log(`🛠️ [getVideoInfo] Running command: ${ytDlpCommand} --dump-json "${url}"`);
+
+    const { stdout } = await execAsync(`${ytDlpCommand} --dump-json "${url}"`);
     const info = JSON.parse(stdout);
 
     // Optional: Log info.title to verify success

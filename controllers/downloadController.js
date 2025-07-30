@@ -58,6 +58,7 @@ export const startDownload = async (req, res) => {
     'yt-dlp',
     '-f', filter,
     '--merge-output-format', outputFormat,
+    '--concurrent-fragments', '5', // Add this line for faster downloads
     '-o', outputPath,
     '--newline',
     '--no-warnings'
@@ -98,6 +99,18 @@ export const startDownload = async (req, res) => {
       d.progress = 100;
     } else {
       d.status = 'failed';
+      // Send an explicit error response if the download failed and there's an error message
+      if (d.error) {
+        // You might want to emit an event or send a specific message to the client
+        // indicating the failure and the error details.
+        // For now, let's just log it more prominently.
+        console.error(`Download ${downloadId} failed with error:`, d.error);
+        // If you had a way to send an error back to the original requestor,
+        // you would do it here. For example, if you had a WebSocket connection
+        // associated with this downloadId.
+      } else {
+        console.error(`Download ${downloadId} failed with exit code:`, code);
+      }
     }
 
     setTimeout(() => {
@@ -114,7 +127,8 @@ export const getProgress = (req, res) => {
   if (!d) {
     return res.status(404).json({ error: 'Download not found' });
   }
-  res.json({ downloadId, ...d });
+  // Include the error message if the download has failed
+  res.json({ downloadId, ...d, error: d.error || null });
 };
 
 export const cancelDownload = (req, res) => {

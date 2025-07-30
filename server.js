@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-// Test route
+
 app.get("/", (req, res) => {
   res.send("🚀 Backend is live!");
 });
