@@ -5,11 +5,11 @@ import { spawn } from 'child_process'
 import isValidUrl from '../utils/validateUrl.js'
 import { checkYtDlp } from '../utils/ytDlpUtils.js'
 
-
 const activeDownloads = new Map();
+const COOKIES_FILE = path.join(os.tmpdir(), 'yt-dlp-cookies.txt'); // Define cookies file path
 
 export const startDownload = async (req, res) => {
-  const { url, type, quality, format } = req.body;
+  const { url, type, quality, format, cookies } = req.body;
 
   if (!url || !isValidUrl(url)) {
     return res.status(400).json({
@@ -54,8 +54,19 @@ export const startDownload = async (req, res) => {
     filter = `${video}+${audio}/best[ext=${format || 'mp4'}]${qFilter}/best`;
   }
 
+  if (cookies) {
+    try {
+      fs.writeFileSync(COOKIES_FILE, cookies);
+      console.log('Cookies file written successfully.');
+    } catch (error) {
+      console.error('Failed to write cookies file:', error);
+      return res.status(500).json({ error: 'Failed to process cookies' });
+    }
+  }
+
   const cmd = [
     'yt-dlp',
+    '--cookies', COOKIES_FILE,
     '-f', filter,
     '--merge-output-format', outputFormat,
     '--concurrent-fragments', '5', // Add this line for faster downloads

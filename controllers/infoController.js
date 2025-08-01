@@ -1,8 +1,11 @@
 import isValidUrl from "../utils/validateUrl.js";
 import { execAsync, checkYtDlp } from "../utils/ytDlpUtils.js";
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 export async function getVideoInfo(req, res) {
-  const { url } = req.body;
+  const { url, cookies } = req.body;
 
   // Log the incoming request
   console.log("▶️ [getVideoInfo] Received URL:", url);
@@ -27,10 +30,24 @@ export async function getVideoInfo(req, res) {
       });
     }
 
-    // Log command execution
-    console.log(`🛠️ [getVideoInfo] Running command: ${ytDlpCommand} --dump-json "${url}"`);
+    // Construct the command with cookies if provided
+    let command = `${ytDlpCommand} --dump-json "${url}"`;
+    if (cookies) {
+      const COOKIES_FILE = path.join(os.tmpdir(), 'yt-dlp-cookies.txt');
+      try {
+        fs.writeFileSync(COOKIES_FILE, cookies);
+        console.log('Cookies file written for info fetch successfully.');
+        command = `${ytDlpCommand} --cookies ${COOKIES_FILE} --dump-json "${url}"`;
+      } catch (error) {
+        console.error('Failed to write cookies file for info fetch:', error);
+        return res.status(500).json({ error: 'Failed to process cookies for info fetch' });
+      }
+    }
 
-    const { stdout } = await execAsync(`${ytDlpCommand} --dump-json "${url}"`);
+    // Log command execution
+    console.log(`🛠️ [getVideoInfo] Running command: ${command}`);
+
+    const { stdout } = await execAsync(command);
     const info = JSON.parse(stdout);
 
     // Optional: Log info.title to verify success

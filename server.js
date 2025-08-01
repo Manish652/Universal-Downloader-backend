@@ -11,7 +11,7 @@ import infoRoutes from './routes/infoRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors({ origin: 'https://universal-downloader-dusky.vercel.app' }));
+app.use(cors({ origin: ' https://universal-downloader-dusky.vercel.app/' }));
 app.use(express.json());
 
 
